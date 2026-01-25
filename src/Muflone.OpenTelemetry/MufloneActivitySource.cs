@@ -11,6 +11,7 @@ internal static class MufloneActivitySource
 	/// The name of the ActivitySource for Muflone instrumentation
 	/// </summary>
 	public const string SourceName = "Muflone";
+	public const string SourceNameChilds = "Muflone.*";
 
 	/// <summary>
 	/// The version of the Muflone instrumentation

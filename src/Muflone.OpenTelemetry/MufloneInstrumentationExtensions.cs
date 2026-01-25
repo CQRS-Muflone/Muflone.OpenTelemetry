@@ -17,7 +17,7 @@ public static class MufloneInstrumentationExtensions
 		ArgumentNullException.ThrowIfNull(builder);
 
 		builder.AddSource(MufloneActivitySource.SourceName);
-		builder.AddSource(MufloneActivitySource.SourceName + ".*");
+		builder.AddSource(MufloneActivitySource.SourceNameChilds);
 		return builder;
 	}
 }

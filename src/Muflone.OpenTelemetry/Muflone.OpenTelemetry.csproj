@@ -9,7 +9,7 @@
     
     <!-- Package Metadata -->
     <PackageId>Muflone.OpenTelemetry</PackageId>
-    <Version>1.0.0</Version>
+    <Version>10.0.0-beta1</Version>
     <Authors>Alessandro Colla - Alberto Acerbis</Authors>
     <Copyright>Copyright (c) 2026 Alessandro Colla, Alberto Acerbis</Copyright>
     <Description>OpenTelemetry instrumentation for Muflone CQRS framework</Description>
