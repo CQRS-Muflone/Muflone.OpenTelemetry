@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <EnablePackageValidation>true</EnablePackageValidation>
+    
+    <!-- Package Metadata -->
+    <PackageId>Muflone.OpenTelemetry</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Alessandro Colla - Alberto Acerbis</Authors>
+    <Copyright>Copyright (c) 2026 Alessandro Colla, Alberto Acerbis</Copyright>
+    <Description>OpenTelemetry instrumentation for Muflone CQRS framework</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/CQRS-Muflone/Muflone.OpenTelemetry</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>muflone;cqrs;opentelemetry;tracing;observability</PackageTags>
+    <PackageProjectUrl>https://github.com/CQRS-Muflone/Muflone.OpenTelemetry</PackageProjectUrl>
+    <Title>Muflone OpenTelemetry Instrumentation</Title>
+    <PackageIcon>Logo.png</PackageIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Muflone" Version="10.0.2" />
+    <PackageReference Include="OpenTelemetry.Api" Version="1.15.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\Logo.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>
