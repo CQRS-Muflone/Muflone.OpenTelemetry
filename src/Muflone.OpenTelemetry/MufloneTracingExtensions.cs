@@ -1,34 +1,25 @@
 using Muflone.Messages.Commands;
 using Muflone.Messages.Events;
-using Muflone.OpenTelemetry;
+using System;
 using System.Diagnostics;
 
 namespace Muflone.Messages;
 
 /// <summary>
-/// Extension methods for OpenTelemetry tracing with Muflone messages
+/// Extension methods for OpenTelemetry tracing with Muflone messages.
+/// These are convenience methods for users who need manual control over tracing.
+/// Most users should rely on the automatic tracing built into the base handler classes
+/// and the instrumented decorators (InstrumentedServiceBus, InstrumentedEventBus, InstrumentedRepository).
 /// </summary>
 public static class MufloneTracingExtensions
 {
 	/// <summary>
-	/// Injects the current trace context into the message's UserProperties using W3C Trace Context standard
+	/// Injects the current trace context into the message's UserProperties using W3C Trace Context standard.
 	/// </summary>
 	/// <param name="message">The message to inject trace context into</param>
 	public static void InjectTraceContext(this IMessage message)
 	{
-		ArgumentNullException.ThrowIfNull(message);
-
-		var activity = Activity.Current;
-		if (activity == null || string.IsNullOrEmpty(activity.Id))
-			return;
-
-		message.UserProperties ??= new Dictionary<string, object>();
-		message.UserProperties[MufloneActivitySource.TraceParentKey] = activity.Id;
-
-		if (!string.IsNullOrEmpty(activity.TraceStateString))
-		{
-			message.UserProperties[MufloneActivitySource.TraceStateKey] = activity.TraceStateString;
-		}
+		OpenTelemetryMessageHelpers.InjectTraceContext(message);
 	}
 
 	/// <summary>
@@ -38,27 +29,22 @@ public static class MufloneTracingExtensions
 	/// <param name="event">The event being consumed</param>
 	/// <param name="activityName">Optional custom activity name (defaults to event type name)</param>
 	/// <returns>The started Activity, or null if activities are disabled. Dispose when operation completes.</returns>
+	[Obsolete("Consumer activities are now created automatically by the handler base classes. " +
+			  "This method is retained for advanced manual scenarios only.")]
 	public static Activity? StartConsumerActivity(this IEvent @event, string? activityName = null)
 	{
 		ArgumentNullException.ThrowIfNull(@event);
 
 		var name = activityName ?? @event.GetType().Name;
-		Activity? activity;
-
-		if (@event.UserProperties != null && TryExtractParentContext(@event.UserProperties, out var parentContext))
-		{
-			activity = MufloneActivitySource.Source.StartActivity(name, ActivityKind.Consumer, parentContext);
-		}
-		else
-		{
-			activity = MufloneActivitySource.Source.StartActivity(name, ActivityKind.Consumer);
-		}
+		Activity? activity = OpenTelemetryMessageHelpers.TryExtractParentContext(@event, out var parentContext)
+			? OpenTelemetry.MufloneActivitySource.Source.StartActivity(name, ActivityKind.Consumer, parentContext)
+			: OpenTelemetry.MufloneActivitySource.Source.StartActivity(name, ActivityKind.Consumer);
 
 		if (activity != null)
 		{
-			activity.SetTag("messaging.operation", "process");
-			activity.SetTag("messaging.message.type", @event.GetType().Name);
-			activity.SetTag("messaging.message.id", @event.MessageId.ToString());
+			activity.SetTag(OpenTelemetryConstants.Tags.MessagingOperation, OpenTelemetryConstants.TagValues.OperationConsume);
+			activity.SetTag(OpenTelemetryConstants.Tags.MessagingMessageType, @event.GetType().Name);
+			activity.SetTag(OpenTelemetryConstants.Tags.MessagingMessageId, @event.MessageId.ToString());
 		}
 
 		return activity;
@@ -71,50 +57,24 @@ public static class MufloneTracingExtensions
 	/// <param name="command">The command being produced</param>
 	/// <param name="activityName">Optional custom activity name (defaults to command type name)</param>
 	/// <returns>The started Activity, or null if activities are disabled. Dispose when operation completes.</returns>
+	[Obsolete("Producer activities are now created automatically by InstrumentedServiceBus and InstrumentedEventBus. " +
+			  "This method is retained for advanced manual scenarios only.")]
 	public static Activity? StartProducerActivity(this ICommand command, string? activityName = null)
 	{
 		ArgumentNullException.ThrowIfNull(command);
 
 		var name = activityName ?? command.GetType().Name;
-		Activity? activity;
-
-		if (command.UserProperties != null && TryExtractParentContext(command.UserProperties, out var parentContext))
-		{
-			activity = MufloneActivitySource.Source.StartActivity(name, ActivityKind.Producer, parentContext);
-		}
-		else
-		{
-			activity = MufloneActivitySource.Source.StartActivity(name, ActivityKind.Producer);
-		}
+		Activity? activity = OpenTelemetryMessageHelpers.TryExtractParentContext(command, out var parentContext)
+			? OpenTelemetry.MufloneActivitySource.Source.StartActivity(name, ActivityKind.Producer, parentContext)
+			: OpenTelemetry.MufloneActivitySource.Source.StartActivity(name, ActivityKind.Producer);
 
 		if (activity != null)
 		{
-			activity.SetTag("messaging.operation", "publish");
-			activity.SetTag("messaging.message.type", command.GetType().Name);
-			activity.SetTag("messaging.message.id", command.MessageId.ToString());
+			activity.SetTag(OpenTelemetryConstants.Tags.MessagingOperation, OpenTelemetryConstants.TagValues.OperationPublish);
+			activity.SetTag(OpenTelemetryConstants.Tags.MessagingMessageType, command.GetType().Name);
+			activity.SetTag(OpenTelemetryConstants.Tags.MessagingMessageId, command.MessageId.ToString());
 		}
 
 		return activity;
-	}
-
-	/// <summary>
-	/// Tries to extract parent ActivityContext from UserProperties using W3C Trace Context standard
-	/// </summary>
-	private static bool TryExtractParentContext(Dictionary<string, object> userProperties, out ActivityContext parentContext)
-	{
-		parentContext = default;
-
-		if (!userProperties.TryGetValue(MufloneActivitySource.TraceParentKey, out var traceparentObj))
-			return false;
-
-		var traceparent = traceparentObj as string;
-		if (string.IsNullOrEmpty(traceparent))
-			return false;
-
-		var tracestate = userProperties.TryGetValue(MufloneActivitySource.TraceStateKey, out var tracestateObj)
-						? tracestateObj as string
-						: null;
-
-		return ActivityContext.TryParse(traceparent, tracestate, out parentContext);
 	}
 }

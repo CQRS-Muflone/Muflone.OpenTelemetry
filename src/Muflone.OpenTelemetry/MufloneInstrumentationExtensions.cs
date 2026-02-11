@@ -1,4 +1,6 @@
+using Muflone.Messages;
 using Muflone.OpenTelemetry;
+using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.Trace;
 
@@ -8,7 +10,8 @@ namespace OpenTelemetry.Trace;
 public static class MufloneInstrumentationExtensions
 {
 	/// <summary>
-	/// Adds Muflone instrumentation to the TracerProvider
+	/// Adds Muflone instrumentation to the TracerProvider.
+	/// Registers all Muflone activity sources so their spans are captured by the configured exporter.
 	/// </summary>
 	/// <param name="builder">The TracerProviderBuilder to configure</param>
 	/// <returns>The configured TracerProviderBuilder for method chaining</returns>
@@ -17,7 +20,12 @@ public static class MufloneInstrumentationExtensions
 		ArgumentNullException.ThrowIfNull(builder);
 
 		builder.AddSource(MufloneActivitySource.SourceName);
-		builder.AddSource(MufloneActivitySource.SourceNameChilds);
+		builder.AddSource(OpenTelemetryConstants.ActivitySourceNames.CommandHandler);
+		builder.AddSource(OpenTelemetryConstants.ActivitySourceNames.DomainEventHandler);
+		builder.AddSource(OpenTelemetryConstants.ActivitySourceNames.IntegrationEventHandler);
+		builder.AddSource(OpenTelemetryConstants.ActivitySourceNames.ServiceBus);
+		builder.AddSource(OpenTelemetryConstants.ActivitySourceNames.EventBus);
+		builder.AddSource(OpenTelemetryConstants.ActivitySourceNames.Repository);
 		return builder;
 	}
 }
