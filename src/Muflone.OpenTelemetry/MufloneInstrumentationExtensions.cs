@@ -1,6 +1,5 @@
 using Muflone.Messages;
 using Muflone.OpenTelemetry;
-using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.Trace;
 

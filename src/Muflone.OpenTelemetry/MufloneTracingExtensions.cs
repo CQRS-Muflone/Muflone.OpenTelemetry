@@ -1,6 +1,5 @@
 using Muflone.Messages.Commands;
 using Muflone.Messages.Events;
-using System;
 using System.Diagnostics;
 
 namespace Muflone.Messages;
@@ -30,7 +29,7 @@ public static class MufloneTracingExtensions
 	/// <param name="activityName">Optional custom activity name (defaults to event type name)</param>
 	/// <returns>The started Activity, or null if activities are disabled. Dispose when operation completes.</returns>
 	[Obsolete("Consumer activities are now created automatically by the handler base classes. " +
-			  "This method is retained for advanced manual scenarios only.")]
+				"This method is retained for advanced manual scenarios only.")]
 	public static Activity? StartConsumerActivity(this IEvent @event, string? activityName = null)
 	{
 		ArgumentNullException.ThrowIfNull(@event);
@@ -58,7 +57,7 @@ public static class MufloneTracingExtensions
 	/// <param name="activityName">Optional custom activity name (defaults to command type name)</param>
 	/// <returns>The started Activity, or null if activities are disabled. Dispose when operation completes.</returns>
 	[Obsolete("Producer activities are now created automatically by InstrumentedServiceBus and InstrumentedEventBus. " +
-			  "This method is retained for advanced manual scenarios only.")]
+				"This method is retained for advanced manual scenarios only.")]
 	public static Activity? StartProducerActivity(this ICommand command, string? activityName = null)
 	{
 		ArgumentNullException.ThrowIfNull(command);

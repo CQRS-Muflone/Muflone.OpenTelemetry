@@ -355,3 +355,6 @@ MigrationBackup/
 .cr/
 .idea/
 .vscode/
+.claude/
+.github/
+.codex/
